@@ -9,13 +9,6 @@ dependencies:
   - windows2012R2
   - windows2016
   - windows
-- name: hwc
-  version: 13.0.0
-  uri: https://github.com/Dynatrace-Reinhard-Pilz/hwc/releases/download/dt-13.0.0/hwc-dt-13.0.0-windows-amd64-634f6425.zip
-  sha256: f1b48a3e3a783d84ca4524f6b0ac409013797a0beb3ab708dc1131dc61ba74b2
-  cf_stacks:
-  - windows2012R2
-  - windows2016
 
 include_files:
   - README.md
