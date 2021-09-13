@@ -131,7 +131,7 @@ func (s *Supplier) Run() error {
 		return err
 	}
 
-	downloadsDir := filepath.Join(s.Stager.BuildDir(), "downlaods")
+	downloadsDir := filepath.Join(s.Stager.DepDir(), "downlaods")
 
 	if err := os.MkdirAll(downloadsDir, 0755); err != nil {
 		s.Log.Error("Failed to create downloads directory "+downloadsDir, err)
@@ -141,7 +141,7 @@ func (s *Supplier) Run() error {
 	dtDownloadLocalFilename := filepath.Join(downloadsDir, "DynatraceAgent.zip")
 
 	s.Log.Info("dtDownloadLocalFilename=" + dtDownloadLocalFilename)
-	dtAgentPath := filepath.Join(s.Stager.BuildDir(), dynatraceAgentFolder)
+	dtAgentPath := filepath.Join(s.Stager.DepDir(), dynatraceAgentFolder)
 	s.Log.Info("Dynatrace Agent Path: " + dtAgentPath)
 
 	dtDownloadURL := getDownloadURL(creds) + "?Api-Token=" + creds.PaasToken
@@ -399,8 +399,9 @@ func setDynatraceProfilerProperties(s *Supplier, dtAgentPath string) bytes.Buffe
 	profilerSettingsBuffer.WriteString("\n")
 	profilerSettingsBuffer.WriteString("set DT_BLOCKLIST=powershell*")
 	profilerSettingsBuffer.WriteString("\n")
-	agent32bit := "c:\\Users\\vcap\\app\\dynatrace\\agent\\lib\\oneagentloader.dll"
-	agent64bit := "c:\\Users\\vcap\\app\\dynatrace\\agent\\lib64\\oneagentloader.dll"
+	depsDir := filepath.Join("%DEPS_DIR%", s.Stager.DepsIdx())
+	agent32bit := filepath.Join(depsDir, "dynatrace\\agent\\lib\\oneagentloader.dll")
+	agent64bit := filepath.Join(depsDir, "dynatrace\\agent\\lib64\\oneagentloader.dll")
 	profilerSettingsBuffer.WriteString(strings.Join([]string{"set COR_PROFILER_PATH_32=", agent32bit}, ""))
 	profilerSettingsBuffer.WriteString("\n")
 	profilerSettingsBuffer.WriteString(strings.Join([]string{"set COR_PROFILER_PATH_64=", agent64bit}, ""))
