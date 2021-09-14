@@ -144,8 +144,10 @@ func (s *Supplier) Run() error {
 	dtAgentPath := filepath.Join(s.Stager.DepDir(), dynatraceAgentFolder)
 	s.Log.Info("Dynatrace Agent Path: " + dtAgentPath)
 
-	dtDownloadURL := getDownloadURL(creds) + "?Api-Token=" + creds.PaasToken
+	//dtDownloadURL := getDownloadURL(creds) + "?Api-Token=" + creds.PaasToken
+	dtDownloadURL := getDownloadURL(creds)
 
+	s.Log.Info("dtDownloadURL=" + dtDownloadURL)
 	s.Log.BeginStep("Downloading Dynatrace agent...")
 	if err := downloadDependency(s, dtDownloadURL, dtDownloadLocalFilename); err != nil {
 		return err
@@ -332,10 +334,11 @@ func getDownloadURL(c *credentials) string {
 	}
 
 	qv := make(url.Values)
+	qv.Add("Api-Token", c.PaasToken)
 	//qv.Add("bitness", "64")
 	// only set the networkzone property when it is configured
 	if c.NetworkZone != "" {
-		qv.Add("networkzone", c.NetworkZone)
+		qv.Add("networkZone", c.NetworkZone)
 	}
 	u.RawQuery = qv.Encode() // Parameters will be sorted by key.
 
