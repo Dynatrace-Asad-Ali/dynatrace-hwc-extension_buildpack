@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -284,9 +285,12 @@ func getBuildpackDir(s *Supplier) (string, error) {
 func downloadDependency(s *Supplier, url string, filepath string) (err error) {
 	//s.Log.Info("Downloading from [%s]", url)
 	s.Log.Info("Saving to [%s]", filepath)
-
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 	var httpClient = &http.Client{
-		Timeout: time.Second * 100,
+		Timeout:   time.Second * 100,
+		Transport: tr,
 	}
 
 	// Create the file
