@@ -221,10 +221,10 @@ func detectDynatraceServices(s *Supplier) (bool, *credentials) {
 				PaasToken:         queryString("paastoken"),
 			}
 
-			if (creds.EnvironmentID != "" && creds.PaasToken != "") || creds.CustomOneAgentURL != "" {
+			if (creds.EnvironmentID != "" || creds.CustomOneAgentURL != "") && creds.PaasToken != "" {
 				found = append(found, creds)
 			} else if creds.EnvironmentID == "" || creds.PaasToken == "" { // One of the fields is empty.
-				s.Log.Warning("Incomplete credentials. environment ID: %s, Paas Token: %s",
+				s.Log.Error("Incomplete credentials. environment ID: %s, Paas Token: %s",
 					creds.EnvironmentID, creds.PaasToken)
 			}
 		}
@@ -389,13 +389,13 @@ func buildProfileD(s *Supplier, cred credentials, dtAgentPath string) error {
 
 	s.Log.Info("Setting environment variables for Dynatrace .net agent")
 
-	scriptContentBuffer = setDynatraceProfilerProperties(s, dtAgentPath)
+	scriptContentBuffer = setDynatraceProfilerProperties(s, dtAgentPath, cred)
 
 	scriptContent := scriptContentBuffer.String()
 	return s.Stager.WriteProfileD("dynatrace.bat", scriptContent)
 }
 
-func setDynatraceProfilerProperties(s *Supplier, dtAgentPath string) bytes.Buffer {
+func setDynatraceProfilerProperties(s *Supplier, dtAgentPath string, cred credentials) bytes.Buffer {
 	s.Log.Info("Setting Dynatrace profiler properties")
 	var profilerSettingsBuffer bytes.Buffer
 	profilerSettingsBuffer.WriteString("set COR_ENABLE_PROFILING=1")
@@ -406,6 +406,10 @@ func setDynatraceProfilerProperties(s *Supplier, dtAgentPath string) bytes.Buffe
 	profilerSettingsBuffer.WriteString("\n")
 	profilerSettingsBuffer.WriteString("set DT_BLOCKLIST=powershell*")
 	profilerSettingsBuffer.WriteString("\n")
+	if cred.NetworkZone != "" {
+		profilerSettingsBuffer.WriteString("set DT_NETWORK_ZONE=" + cred.NetworkZone)
+		profilerSettingsBuffer.WriteString("\n")
+	}
 	depsDir := filepath.Join("%DEPS_DIR%", s.Stager.DepsIdx())
 	agent32bit := filepath.Join(depsDir, "dynatrace\\agent\\lib\\oneagentloader.dll")
 	agent64bit := filepath.Join(depsDir, "dynatrace\\agent\\lib64\\oneagentloader.dll")
